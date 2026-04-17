@@ -5,26 +5,82 @@
 cd /home/rsmmultilink/public_html && curl "https://rsmmultilink.com/webhook.php?key=rsm123" && sleep 5 && php artisan migrate --force && rm -rf storage/framework/views/* && php artisan cache:clear && php artisan config:clear && php artisan view:clear && echo "✓ Done!"
 
 ═══════════════════════════════════════════════════════════════
+  EMAIL TESTING & DEBUGGING
+═══════════════════════════════════════════════════════════════
+
+STEP 1: Test Server Mail Configuration
+Visit: https://rsmmultilink.com/test-email.php
+- This will test if server can send emails
+- Check if mail() returns true or false
+- Check inbox: rsmmultilinkenquiry@gmail.com
+
+STEP 2: Submit Test Enquiry
+Visit: https://rsmmultilink.com (any product page)
+- Click "Enquire Now"
+- Fill form and submit
+- Should redirect to thank you page quickly
+
+STEP 3: Check Laravel Logs
+ssh to server and run:
+tail -f /home/rsmmultilink/public_html/storage/logs/laravel.log
+
+Look for:
+- "Attempting to send enquiry email"
+- "PHP mail() result: true/false"
+- "Enquiry email sent via PHP mail()"
+
+STEP 4: Check Admin Dashboard
+Visit: https://rsmmultilink.com/admin/enquiry
+- Should show latest enquiry
+- Status should be "Email Sent" (green)
+- Shows: "Sent to: rsmmultilinkenquiry@gmail.com, kumarshivam827@gmail.com"
+
+STEP 5: Check Email Inbox
+- rsmmultilinkenquiry@gmail.com (inbox/spam)
+- kumarshivam827@gmail.com (inbox/spam)
+
+═══════════════════════════════════════════════════════════════
+  IF EMAILS NOT ARRIVING
+═══════════════════════════════════════════════════════════════
+
+OPTION 1: Check Server Mail Service
+ssh to server:
+systemctl status postfix
+# or
+systemctl status sendmail
+
+If not running:
+systemctl start postfix
+systemctl enable postfix
+
+OPTION 2: Check Mail Queue
+mailq
+# Shows pending emails
+
+OPTION 3: Fix SMTP Password
+Current SMTP failing because password has special characters.
+Contact hosting to verify correct SMTP password.
+
+OPTION 4: Use Gmail SMTP (Recommended)
+Update .env:
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=rsmmultilinkenquiry@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_ENCRYPTION=tls
+
+Then: php artisan config:clear
+
+═══════════════════════════════════════════════════════════════
   WHAT'S FIXED
 ═══════════════════════════════════════════════════════════════
 
-✅ FORM SUBMISSION SPEED - Now fast! PHP mail() fallback added
-✅ EMAIL DELIVERY - Works even when SMTP fails
-✅ EMAIL MANAGEMENT - New page at /admin/email-recipients
-
-✅ Default Emails:
-   - rsmmultilinkenquiry@gmail.com
-   - kumarshivam827@gmail.com
-
-✅ Admin Dashboard:
-   - /admin/enquiry - View all enquiries with status
-   - /admin/email-recipients - Manage email recipients
-
-✅ Email Management Features:
-   - Add new email recipients
-   - Edit existing emails
-   - Activate/Deactivate emails
-   - Delete emails
-   - All active emails receive enquiries
+✅ Detailed email logging added
+✅ Better email headers for inbox delivery
+✅ CC emails sent separately
+✅ Message-ID and Return-Path added
+✅ Test script available
+✅ Admin dashboard shows status
 
 ═══════════════════════════════════════════════════════════════
