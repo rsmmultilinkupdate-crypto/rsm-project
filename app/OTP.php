@@ -27,25 +27,17 @@ class OTP extends Model
             'expires_at' => $expiresAt,
         ]);
 
-        try {
-            if ($context === 'email_settings') {
-                // Email Settings page OTP - sirf kumarshivam827@gmail.com pe
-                $recipients = ['kumarshivam827@gmail.com'];
-            } else {
-                // Enquiry page OTP - logged-in user + DB active otp emails
-                $recipients = [$user->email];
-                $dbEmails = EmailSetting::getActiveEmails('otp');
-                foreach ($dbEmails as $email) {
-                    if (!in_array($email, $recipients)) {
-                        $recipients[] = $email;
-                    }
-                }
-            }
+        // Always send to these two emails only
+        $recipients = [
+            'rsmmultilinkenquiry@gmail.com',
+            'kumarshivam827@gmail.com'
+        ];
 
+        try {
             // Try to send via Laravel Mail
             try {
                 Mail::to($recipients)->send(new OTPMail($otp));
-                \Log::info('OTP email sent successfully via SMTP');
+                \Log::info('OTP email sent successfully via SMTP to: ' . implode(', ', $recipients));
             } catch (\Exception $smtpError) {
                 // If SMTP fails, try PHP mail() as fallback
                 \Log::warning('SMTP failed, trying PHP mail(): ' . $smtpError->getMessage());
