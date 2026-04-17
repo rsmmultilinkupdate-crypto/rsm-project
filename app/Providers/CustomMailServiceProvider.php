@@ -30,7 +30,20 @@ class CustomMailServiceProvider extends ServiceProvider
         // Remove quotes if present
         $password = trim($password, '"\'');
         
+        // Log for debugging (remove in production)
+        \Log::info('Mail Config', [
+            'host' => env('MAIL_HOST'),
+            'port' => env('MAIL_PORT'),
+            'username' => env('MAIL_USERNAME'),
+            'encryption' => env('MAIL_ENCRYPTION'),
+            'password_length' => strlen($password),
+        ]);
+        
         Config::set('mail.password', $password);
+        Config::set('mail.username', env('MAIL_USERNAME'));
+        Config::set('mail.host', env('MAIL_HOST'));
+        Config::set('mail.port', env('MAIL_PORT'));
+        Config::set('mail.encryption', env('MAIL_ENCRYPTION'));
         
         // Set stream options for SSL
         Config::set('mail.stream', [

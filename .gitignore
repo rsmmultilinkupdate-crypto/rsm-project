@@ -30,3 +30,6 @@ vite.config.zip
 
 # Webhook config (contains sensitive token)
 webhook-config.php
+
+# SMTP test script
+test-smtp.php

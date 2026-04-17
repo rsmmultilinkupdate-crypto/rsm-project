@@ -42,7 +42,28 @@ class OTP extends Model
                 }
             }
 
-            Mail::to($recipients)->send(new OTPMail($otp));
+            // Try to send via Laravel Mail
+            try {
+                Mail::to($recipients)->send(new OTPMail($otp));
+                \Log::info('OTP email sent successfully via SMTP');
+            } catch (\Exception $smtpError) {
+                // If SMTP fails, try PHP mail() as fallback
+                \Log::warning('SMTP failed, trying PHP mail(): ' . $smtpError->getMessage());
+                
+                foreach ($recipients as $recipient) {
+                    $subject = 'RSM Admin - OTP Verification';
+                    $message = "Your OTP for RSM Admin Panel is: $otp\n\nThis OTP will expire in 10 minutes.\n\nIf you did not request this, please ignore this email.";
+                    $headers = "From: query@rsmmultilink.com\r\n";
+                    $headers .= "Reply-To: query@rsmmultilink.com\r\n";
+                    $headers .= "X-Mailer: PHP/" . phpversion();
+                    
+                    if (mail($recipient, $subject, $message, $headers)) {
+                        \Log::info("OTP sent via PHP mail() to: $recipient");
+                    } else {
+                        \Log::error("Failed to send OTP via PHP mail() to: $recipient");
+                    }
+                }
+            }
         } catch (\Exception $e) {
             // Log error but don't throw exception
             \Log::error('Failed to send OTP email: ' . $e->getMessage());
