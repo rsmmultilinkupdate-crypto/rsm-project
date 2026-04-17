@@ -23,3 +23,7 @@ error_log
 /storage/framework/views
 /storage/debugbar
 /bootstrap/cache/*.php
+
+# Large files
+*.zip
+vite.config.zip
