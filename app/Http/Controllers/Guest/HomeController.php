@@ -348,6 +348,8 @@ class HomeController extends Controller
                          $toEmail = $recipients[0];
                          $ccEmails = array_slice($recipients, 1);
                          
+                         \Log::info('Attempting to send contact form email', ['to' => $toEmail, 'cc' => $ccEmails]);
+                         
                          // Try SMTP first with timeout
                          Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails)
                           {
@@ -362,10 +364,11 @@ class HomeController extends Controller
                         // Update status to sent
                         $enquery->status = 'sent';
                         $enquery->save();
+                        \Log::info('Contact form email sent successfully via SMTP');
                         
                     } catch (\Exception $e) {
                         // SMTP failed, try PHP mail() as fallback
-                        \Log::warning('SMTP failed for contact form, trying PHP mail(): ' . $e->getMessage());
+                        \Log::warning('SMTP failed for contact form: ' . $e->getMessage());
                         
                         try {
                             $recipients = EmailRecipient::getActiveEmails();
@@ -373,7 +376,7 @@ class HomeController extends Controller
                                 $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
                             }
                             
-                            $subject = 'Contact Us!';
+                            $subject = 'Contact Us - RSM Multilink';
                             $message = "New Contact Form Submission\n\n";
                             $message .= "Name: " . $data['name'] . "\n";
                             $message .= "Email: " . $data['email'] . "\n";
@@ -381,27 +384,43 @@ class HomeController extends Controller
                             $message .= "Message: " . $data['message'] . "\n\n";
                             $message .= "---\nRSM Multilink\nwww.rsmmultilink.com";
                             
-                            $headers = "From: RSM Website <noreply@rsmmultilink.com>\r\n";
+                            // Better headers for inbox delivery
+                            $headers = "From: RSM Multilink <noreply@rsmmultilink.com>\r\n";
                             $headers .= "Reply-To: " . $data['email'] . "\r\n";
-                            if (count($recipients) > 1) {
-                                $headers .= "Cc: " . implode(', ', array_slice($recipients, 1)) . "\r\n";
-                            }
+                            $headers .= "Return-Path: noreply@rsmmultilink.com\r\n";
+                            $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
                             $headers .= "MIME-Version: 1.0\r\n";
                             $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                            $headers .= "X-Priority: 3\r\n";
+                            $headers .= "Message-ID: <" . time() . "-" . md5($data['email']) . "@rsmmultilink.com>\r\n";
                             
-                            if (mail($recipients[0], $subject, $message, $headers)) {
+                            \Log::info('Attempting PHP mail()', ['to' => $recipients[0], 'subject' => $subject]);
+                            
+                            $mailResult = mail($recipients[0], $subject, $message, $headers);
+                            
+                            \Log::info('PHP mail() result', ['result' => $mailResult ? 'true' : 'false']);
+                            
+                            if ($mailResult) {
+                                // Send to CC emails separately
+                                if (count($recipients) > 1) {
+                                    foreach (array_slice($recipients, 1) as $ccEmail) {
+                                        mail($ccEmail, $subject, $message, $headers);
+                                        \Log::info('CC email sent', ['to' => $ccEmail]);
+                                    }
+                                }
+                                
                                 $enquery->status = 'sent';
                                 $enquery->save();
                                 \Log::info('Contact form email sent via PHP mail()');
                             } else {
-                                throw new \Exception('PHP mail() also failed');
+                                throw new \Exception('PHP mail() returned false');
                             }
                         } catch (\Exception $e2) {
                             // Both failed
                             $enquery->status = 'failed';
                             $enquery->email_error = 'SMTP: ' . $e->getMessage() . ' | PHP mail: ' . $e2->getMessage();
                             $enquery->save();
-                            \Log::error('Both SMTP and PHP mail failed for contact form');
+                            \Log::error('Both SMTP and PHP mail failed for contact form', ['error' => $e2->getMessage()]);
                         }
                     }
             
@@ -459,6 +478,8 @@ class HomeController extends Controller
                         $toEmail = $recipients[0];
                         $ccEmails = array_slice($recipients, 1);
                         
+                        \Log::info('Attempting to send enquiry email', ['to' => $toEmail, 'cc' => $ccEmails]);
+                        
                         // Try SMTP first with timeout
                         Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails)
                         {
@@ -473,10 +494,11 @@ class HomeController extends Controller
                         // Update status to sent
                         $enquery->status = 'sent';
                         $enquery->save();
+                        \Log::info('Enquiry email sent successfully via SMTP');
                         
                     } catch (\Exception $e) {
                         // SMTP failed, try PHP mail() as fallback
-                        \Log::warning('SMTP failed for enquiry, trying PHP mail(): ' . $e->getMessage());
+                        \Log::warning('SMTP failed for enquiry: ' . $e->getMessage());
                         
                         try {
                             $recipients = EmailRecipient::getActiveEmails();
@@ -484,7 +506,7 @@ class HomeController extends Controller
                                 $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
                             }
                             
-                            $subject = 'Enquire Now!';
+                            $subject = 'Enquire Now - RSM Multilink';
                             $message = "New Enquiry from Website\n\n";
                             $message .= "Name: " . $data['name'] . "\n";
                             $message .= "Email: " . $data['email'] . "\n";
@@ -493,27 +515,43 @@ class HomeController extends Controller
                             $message .= "Message: " . $data['message'] . "\n\n";
                             $message .= "---\nRSM Multilink\nwww.rsmmultilink.com";
                             
-                            $headers = "From: RSM Website <noreply@rsmmultilink.com>\r\n";
+                            // Better headers for inbox delivery
+                            $headers = "From: RSM Multilink <noreply@rsmmultilink.com>\r\n";
                             $headers .= "Reply-To: " . $data['email'] . "\r\n";
-                            if (count($recipients) > 1) {
-                                $headers .= "Cc: " . implode(', ', array_slice($recipients, 1)) . "\r\n";
-                            }
+                            $headers .= "Return-Path: noreply@rsmmultilink.com\r\n";
+                            $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
                             $headers .= "MIME-Version: 1.0\r\n";
                             $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                            $headers .= "X-Priority: 3\r\n";
+                            $headers .= "Message-ID: <" . time() . "-" . md5($data['email']) . "@rsmmultilink.com>\r\n";
                             
-                            if (mail($recipients[0], $subject, $message, $headers)) {
+                            \Log::info('Attempting PHP mail()', ['to' => $recipients[0], 'subject' => $subject]);
+                            
+                            $mailResult = mail($recipients[0], $subject, $message, $headers);
+                            
+                            \Log::info('PHP mail() result', ['result' => $mailResult ? 'true' : 'false']);
+                            
+                            if ($mailResult) {
+                                // Send to CC emails separately
+                                if (count($recipients) > 1) {
+                                    foreach (array_slice($recipients, 1) as $ccEmail) {
+                                        mail($ccEmail, $subject, $message, $headers);
+                                        \Log::info('CC email sent', ['to' => $ccEmail]);
+                                    }
+                                }
+                                
                                 $enquery->status = 'sent';
                                 $enquery->save();
                                 \Log::info('Enquiry email sent via PHP mail()');
                             } else {
-                                throw new \Exception('PHP mail() also failed');
+                                throw new \Exception('PHP mail() returned false');
                             }
                         } catch (\Exception $e2) {
                             // Both failed
                             $enquery->status = 'failed';
                             $enquery->email_error = 'SMTP: ' . $e->getMessage() . ' | PHP mail: ' . $e2->getMessage();
                             $enquery->save();
-                            \Log::error('Both SMTP and PHP mail failed for enquiry');
+                            \Log::error('Both SMTP and PHP mail failed for enquiry', ['error' => $e2->getMessage()]);
                         }
                     }
 			echo 'true';
