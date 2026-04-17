@@ -8,6 +8,10 @@ RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 RewriteCond %{REQUEST_URI} ^/sitemap.xml$ [NC]
 RewriteRule ^(.*)$ public/sitemap.xml [L]
 
+# Bypass webhook.php for auto-deployment
+RewriteCond %{REQUEST_URI} ^/webhook.php$ [NC]
+RewriteRule ^(.*)$ webhook.php [L]
+
 RewriteCond %{REQUEST_FILENAME} -d [OR]
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^ ^$1 [N]
