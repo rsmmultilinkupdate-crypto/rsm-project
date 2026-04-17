@@ -190,6 +190,10 @@ Route::prefix('admin')->group(function () {
         Route::get('email-settings/{id}/toggle', 'Admin\EmailSettingsController@toggleStatus')->name('email-settings.toggle');
         Route::post('email-settings/test-mail', 'Admin\EmailSettingsController@sendTestMail')->name('email-settings.test-mail');
     });
+    
+    // Email Logs - View email send history
+    Route::get('email-logs', 'Admin\EmailLogsController@index')->name('email-logs.index')->middleware('role:manage_settings');
+    Route::post('email-logs/clear', 'Admin\EmailLogsController@clear')->name('email-logs.clear')->middleware('role:manage_settings');
 });
 
 
