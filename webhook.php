@@ -28,12 +28,26 @@ try {
     
     // Step 1: Download ZIP
     logMessage("Downloading ZIP from GitHub...");
-    $zipContent = file_get_contents($zipUrl);
-    if ($zipContent === false) {
-        throw new Exception("Failed to download ZIP file");
+    
+    // Use curl for better error handling
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $zipUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0');
+    
+    $zipContent = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+    
+    if ($zipContent === false || $httpCode !== 200) {
+        throw new Exception("Failed to download ZIP file. HTTP Code: $httpCode, Error: $curlError");
     }
+    
     file_put_contents($zipFile, $zipContent);
-    logMessage("ZIP downloaded successfully");
+    logMessage("ZIP downloaded successfully (Size: " . strlen($zipContent) . " bytes)");
     
     // Step 2: Extract ZIP
     logMessage("Extracting ZIP...");
