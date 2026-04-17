@@ -54,7 +54,16 @@ Route::get('unauthorized', function () {
 });
 Route::get('otp/verify', 'OtpController@showVerifyForm')->name('otp.verify');
 Route::post('otp/verify', 'OtpController@verifyOTP');
- Route::middleware(['auth','otp'])->group(function () {
+
+// Debug route to clear OTP sessions
+Route::get('otp/clear-session', function() {
+    session()->forget('otp_verified_enquiry');
+    session()->forget('otp_verified_email_settings');
+    session()->forget('otp_context');
+    return 'OTP sessions cleared. Now try accessing the protected pages.';
+})->middleware('auth');
+
+Route::middleware(['auth','otp:enquiry'])->group(function () {
     Route::resource('admin/enquiry', 'Admin\EnqueryController', ['except' => ['create', 'store' ]]);
 }); 
 	
