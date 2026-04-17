@@ -52,22 +52,8 @@ Route::get('content/view/{pages}', 'Guest\HomeController@pages');
 Route::get('unauthorized', function () {
     return view('unauthorized');
 });
-Route::get('otp/verify', 'OtpController@showVerifyForm')->name('otp.verify');
-Route::post('otp/verify', 'OtpController@verifyOTP');
-
-// Debug route to clear OTP sessions
-Route::get('otp/clear-session', function() {
-    session()->forget('otp_verified_enquiry');
-    session()->forget('otp_verified_email_settings');
-    session()->forget('otp_context');
-    return 'OTP sessions cleared. Now try accessing the protected pages.';
-})->middleware('auth');
-
-Route::middleware(['auth','otp:enquiry'])->group(function () {
-    Route::resource('admin/enquiry', 'Admin\EnqueryController', ['except' => ['create', 'store' ]]);
-}); 
-	
-//Route::resource('admin/enquiry', 'Admin\EnqueryController', ['except' => ['create', 'store' ]])->middleware('auth');
+// OTP routes removed - direct access with auth only
+Route::resource('admin/enquiry', 'Admin\EnqueryController', ['except' => ['create', 'store' ]])->middleware('auth');
  
 // Admin Routes
 Route::prefix('admin')->group(function () {
@@ -181,15 +167,13 @@ Route::prefix('admin')->group(function () {
 		})->name('sitemap.form');
 	Route::post('upload-sitemap', [SitemapController::class, 'upload'])->name('sitemap.upload');
 
-    // Email Settings - OTP protected (sirf kumarshivam827@gmail.com pe OTP jaata hai)
-    Route::middleware(['auth', 'otp:email_settings'])->group(function () {
-        Route::get('email-settings', 'Admin\EmailSettingsController@index')->name('email-settings.index');
-        Route::post('email-settings', 'Admin\EmailSettingsController@store')->name('email-settings.store');
-        Route::put('email-settings/{id}', 'Admin\EmailSettingsController@update')->name('email-settings.update');
-        Route::delete('email-settings/{id}', 'Admin\EmailSettingsController@destroy')->name('email-settings.destroy');
-        Route::get('email-settings/{id}/toggle', 'Admin\EmailSettingsController@toggleStatus')->name('email-settings.toggle');
-        Route::post('email-settings/test-mail', 'Admin\EmailSettingsController@sendTestMail')->name('email-settings.test-mail');
-    });
+    // Email Settings - auth only (OTP removed)
+    Route::get('email-settings', 'Admin\EmailSettingsController@index')->name('email-settings.index')->middleware('auth');
+    Route::post('email-settings', 'Admin\EmailSettingsController@store')->name('email-settings.store')->middleware('auth');
+    Route::put('email-settings/{id}', 'Admin\EmailSettingsController@update')->name('email-settings.update')->middleware('auth');
+    Route::delete('email-settings/{id}', 'Admin\EmailSettingsController@destroy')->name('email-settings.destroy')->middleware('auth');
+    Route::get('email-settings/{id}/toggle', 'Admin\EmailSettingsController@toggleStatus')->name('email-settings.toggle')->middleware('auth');
+    Route::post('email-settings/test-mail', 'Admin\EmailSettingsController@sendTestMail')->name('email-settings.test-mail')->middleware('auth');
     
     // Email Logs - View email send history
     Route::get('email-logs', 'Admin\EmailLogsController@index')->name('email-logs.index')->middleware('role:manage_settings');
