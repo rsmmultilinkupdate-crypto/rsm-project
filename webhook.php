@@ -10,16 +10,22 @@ if (!isset($_GET['key']) || $_GET['key'] !== 'rsm123') {
     die("Access denied");
 }
 
-// Configuration
-$zipUrl = "https://github.com/rsmmultilinkupdate-crypto/rsm-project/archive/refs/heads/main.zip";
-$zipFile = "/home/rsmmultilink/public_html/project.zip";
-$extractPath = "/home/rsmmultilink/public_html/";
-$logFile = "/home/rsmmultilink/public_html/deployment.log";
+// Load configuration
+$configFile = __DIR__ . '/webhook-config.php';
+if (file_exists($configFile)) {
+    $config = include $configFile;
+    $githubToken = $config['github_token'] ?? '';
+    $zipUrl = $config['zip_url'] ?? "https://github.com/rsmmultilinkupdate-crypto/rsm-project/archive/refs/heads/main.zip";
+    $extractPath = $config['extract_path'] ?? "/home/rsmmultilink/public_html/";
+} else {
+    $githubToken = '';
+    $zipUrl = "https://github.com/rsmmultilinkupdate-crypto/rsm-project/archive/refs/heads/main.zip";
+    $extractPath = "/home/rsmmultilink/public_html/";
+}
 
-// GitHub Token (optional - only needed for private repos)
-// Get token from: https://github.com/settings/tokens
-// Leave empty if repo is public
-$githubToken = ""; // Add your token here if repo is private
+// Configuration
+$zipFile = $extractPath . "project.zip";
+$logFile = $extractPath . "deployment.log"; // Add your token here if repo is private
 
 // Log function
 function logMessage($message) {
@@ -121,6 +127,10 @@ try {
     // Step 5: Run Laravel commands (optional)
     logMessage("Running Laravel commands...");
     chdir($extractPath);
+    
+    // Run migrations
+    exec("php artisan migrate --force 2>&1", $outputMigrate, $returnMigrate);
+    logMessage("Migrations: " . implode("\n", $outputMigrate));
     
     // Clear cache
     exec("php artisan cache:clear 2>&1", $output1, $return1);

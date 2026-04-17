@@ -27,3 +27,6 @@ error_log
 # Large files
 *.zip
 vite.config.zip
+
+# Webhook config (contains sensitive token)
+webhook-config.php
