@@ -16,6 +16,11 @@ $zipFile = "/home/rsmmultilink/public_html/project.zip";
 $extractPath = "/home/rsmmultilink/public_html/";
 $logFile = "/home/rsmmultilink/public_html/deployment.log";
 
+// GitHub Token (optional - only needed for private repos)
+// Get token from: https://github.com/settings/tokens
+// Leave empty if repo is public
+$githubToken = ""; // Add your token here if repo is private
+
 // Log function
 function logMessage($message) {
     global $logFile;
@@ -36,6 +41,14 @@ try {
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0');
+    
+    // Add GitHub token if provided (for private repos)
+    if (!empty($githubToken)) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: token ' . $githubToken,
+            'Accept: application/vnd.github.v3+json'
+        ]);
+    }
     
     $zipContent = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
