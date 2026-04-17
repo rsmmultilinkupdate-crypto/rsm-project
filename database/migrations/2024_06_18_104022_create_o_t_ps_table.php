@@ -13,14 +13,16 @@ class CreateOTPsTable extends Migration
      */
     public function up()
     {
-        Schema::create('o_t_ps', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedBigInteger('user_id');
-            $table->string('otp');
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+        if (!Schema::hasTable('o_t_ps')) {
+            Schema::create('o_t_ps', function (Blueprint $table) {
+                $table->increments('id');
+                $table->unsignedBigInteger('user_id');
+                $table->string('otp');
+                $table->timestamp('created_at')->nullable();
+                $table->timestamp('expires_at')->nullable();
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
     }
 
     /**
