@@ -1,0 +1,23 @@
+═══════════════════════════════════════════════════════════════
+  DEPLOYMENT COMMAND
+═══════════════════════════════════════════════════════════════
+
+cd /home/rsmmultilink/public_html && curl "https://rsmmultilink.com/webhook.php?key=rsm123" && sleep 5 && php artisan migrate --force && rm -rf storage/framework/views/* && php artisan cache:clear && php artisan config:clear && php artisan view:clear && echo "✓ Done!"
+
+═══════════════════════════════════════════════════════════════
+  WHAT'S FIXED
+═══════════════════════════════════════════════════════════════
+
+✅ Contact Form Email: rsmmultilinkenquiry@gmail.com (TO)
+                       kumarshivam827@gmail.com (CC)
+
+✅ Enquiry Modal Email: rsmmultilinkenquiry@gmail.com (TO)
+                        kumarshivam827@gmail.com (CC)
+
+✅ Admin Dashboard: /admin/enquiry
+   - Shows all enquiries
+   - Email status (Sent/Pending/Failed)
+   - Shows which emails received it
+   - Shows error if failed
+
+═══════════════════════════════════════════════════════════════
