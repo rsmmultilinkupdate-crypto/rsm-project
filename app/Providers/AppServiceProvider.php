@@ -18,21 +18,27 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // Share sidebar Categories with all views
-        if (Schema::hasTable('categories')) {
-            $categories = Category::select('name', 'slug', 'id')->get();
-            View::share('sidebar_categories', $categories);
-        }
+        // Wrap database operations in try-catch to prevent boot errors
+        try {
+            // Share sidebar Categories with all views
+            if (Schema::hasTable('categories')) {
+                $categories = Category::select('name', 'slug', 'id')->get();
+                View::share('sidebar_categories', $categories);
+            }
 
-        // Share Settings all views
-        if (Schema::hasTable('settings')) {
-            // You can keep this in your filters.php file
-            App::singleton('global_settings', function () {
-                return Setting::select('setting_name', 'setting_value')->get();
-            });
-            // If you use this line of code then it'll be available in any view
-            // as $global_settings but you may also use app('global_settings') as well
-            // View::share('global_settings', app('global_settings'));
+            // Share Settings all views
+            if (Schema::hasTable('settings')) {
+                // You can keep this in your filters.php file
+                App::singleton('global_settings', function () {
+                    return Setting::select('setting_name', 'setting_value')->get();
+                });
+                // If you use this line of code then it'll be available in any view
+                // as $global_settings but you may also use app('global_settings') as well
+                // View::share('global_settings', app('global_settings'));
+            }
+        } catch (\Exception $e) {
+            // Log error but don't break the application
+            \Log::error('AppServiceProvider boot error: ' . $e->getMessage());
         }
     }
 

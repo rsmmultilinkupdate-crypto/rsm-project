@@ -1,0 +1,127 @@
+<?php
+/**
+ * GitHub Auto-Deployment Webhook
+ * URL: https://rsmmultilink.com/webhook.php?key=rsm123
+ */
+
+// Security check
+if (!isset($_GET['key']) || $_GET['key'] !== 'rsm123') {
+    http_response_code(403);
+    die("Access denied");
+}
+
+// Configuration
+$zipUrl = "https://github.com/rsmmultilinkupdate-crypto/rsm-project/archive/refs/heads/main.zip";
+$zipFile = "/home/rsmmultilink/public_html/project.zip";
+$extractPath = "/home/rsmmultilink/public_html/";
+$logFile = "/home/rsmmultilink/public_html/deployment.log";
+
+// Log function
+function logMessage($message) {
+    global $logFile;
+    $timestamp = date('Y-m-d H:i:s');
+    file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND);
+}
+
+try {
+    logMessage("=== Deployment Started ===");
+    
+    // Step 1: Download ZIP
+    logMessage("Downloading ZIP from GitHub...");
+    $zipContent = file_get_contents($zipUrl);
+    if ($zipContent === false) {
+        throw new Exception("Failed to download ZIP file");
+    }
+    file_put_contents($zipFile, $zipContent);
+    logMessage("ZIP downloaded successfully");
+    
+    // Step 2: Extract ZIP
+    logMessage("Extracting ZIP...");
+    $zip = new ZipArchive;
+    if ($zip->open($zipFile) === TRUE) {
+        $zip->extractTo($extractPath);
+        $zip->close();
+        logMessage("ZIP extracted successfully");
+    } else {
+        throw new Exception("Failed to extract ZIP file");
+    }
+    
+    // Step 3: Move files from extracted folder to root
+    logMessage("Moving files to root directory...");
+    $extractedFolder = $extractPath . "rsm-project-main/";
+    
+    if (is_dir($extractedFolder)) {
+        $files = glob($extractedFolder . "*");
+        foreach ($files as $file) {
+            $dest = $extractPath . basename($file);
+            
+            // Skip if destination exists and is a directory
+            if (is_dir($dest) && is_dir($file)) {
+                // Recursively copy directory contents
+                $iterator = new RecursiveIteratorIterator(
+                    new RecursiveDirectoryIterator($file, RecursiveDirectoryIterator::SKIP_DOTS),
+                    RecursiveIteratorIterator::SELF_FIRST
+                );
+                
+                foreach ($iterator as $item) {
+                    $destPath = $dest . DIRECTORY_SEPARATOR . $iterator->getSubPathName();
+                    if ($item->isDir()) {
+                        @mkdir($destPath, 0755, true);
+                    } else {
+                        @copy($item, $destPath);
+                    }
+                }
+            } else {
+                // Move/replace file
+                if (file_exists($dest)) {
+                    unlink($dest);
+                }
+                rename($file, $dest);
+            }
+        }
+        
+        // Remove extracted folder
+        rmdir($extractedFolder);
+        logMessage("Files moved successfully");
+    }
+    
+    // Step 4: Cleanup
+    logMessage("Cleaning up...");
+    if (file_exists($zipFile)) {
+        unlink($zipFile);
+    }
+    
+    // Step 5: Run Laravel commands (optional)
+    logMessage("Running Laravel commands...");
+    chdir($extractPath);
+    
+    // Clear cache
+    exec("php artisan cache:clear 2>&1", $output1, $return1);
+    logMessage("Cache cleared: " . implode("\n", $output1));
+    
+    // Clear config cache
+    exec("php artisan config:clear 2>&1", $output2, $return2);
+    logMessage("Config cleared: " . implode("\n", $output2));
+    
+    // Clear view cache
+    exec("php artisan view:clear 2>&1", $output3, $return3);
+    logMessage("Views cleared: " . implode("\n", $output3));
+    
+    logMessage("=== Deployment Completed Successfully ===");
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => 'Deployment completed successfully',
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+    
+} catch (Exception $e) {
+    logMessage("ERROR: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => $e->getMessage(),
+        'timestamp' => date('Y-m-d H:i:s')
+    ]);
+}
+?>
