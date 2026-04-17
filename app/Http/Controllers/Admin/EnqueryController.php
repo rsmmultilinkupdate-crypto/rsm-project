@@ -28,10 +28,23 @@ class EnqueryController extends Controller
     {
 		try {
             $enquiries = Enquery::orderBy('id', 'desc')->get();
-		    return view('admin/enquiries/index',['data'=>$enquiries]);
+            
+            // Get active email recipients for display
+            $activeEmails = [];
+            try {
+                $activeEmails = \App\EmailRecipient::where('is_active', 1)->pluck('email')->toArray();
+            } catch (\Exception $e) {
+                \Log::warning('Could not fetch email recipients: ' . $e->getMessage());
+            }
+            
+            if (empty($activeEmails)) {
+                $activeEmails = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
+            }
+            
+		    return view('admin/enquiries/index', ['data' => $enquiries, 'activeEmails' => $activeEmails]);
         } catch (\Exception $e) {
             \Log::error('Enquiry index error: ' . $e->getMessage());
-            return view('admin/enquiries/index',['data'=>collect()]);
+            return view('admin/enquiries/index', ['data' => collect(), 'activeEmails' => ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com']]);
         }
     }
 

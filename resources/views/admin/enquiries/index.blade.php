@@ -39,15 +39,7 @@
                         {{$enquery->status_label}}
                     </span>
                     @if($enquery->status == 'sent')
-                        <br><small class="text-muted">Sent to: 
-                            @php
-                                $recipients = \App\EmailRecipient::where('is_active', 1)->pluck('email')->toArray();
-                                if (empty($recipients)) {
-                                    $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
-                                }
-                            @endphp
-                            {{ implode(', ', $recipients) }}
-                        </small>
+                        <br><small class="text-muted">Sent to: {{ implode(', ', $activeEmails) }}</small>
                     @endif
                     @if($enquery->status == 'failed' && $enquery->email_error)
                         <br><small class="text-danger" title="{{$enquery->email_error}}">Error: {{Str::limit($enquery->email_error, 30)}}</small>
