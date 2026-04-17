@@ -1,0 +1,73 @@
+ <!-- Footer Alternative-->
+
+ <footer>
+        <div class="container footer_page_listing">
+            <div class="row">
+                <div class="col-md-3 col-sm-12">
+                    <div class="info_guid_links">
+                        <h4>Hot Products</h4>
+                        <ul>
+                          @foreach (array_slice($menu, 0, 5) as $oldCategory)
+                          <li><a class="footer_link_style" href="{{ url('product/catproducts') }}/{{ $oldCategory['slug'] }}">{{ $oldCategory['category'] }}</a>
+                            </li>
+                           @endforeach
+                        </ul>
+                    </div>
+
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="info_guid_links">
+                          <div class="map">
+                                <div style="width: 100%"></div><br>
+                            </div>
+                            <div class="review-img">
+                                <img src="{{ url('') }}/code/images/google-review.png" alt="google reviews" class="">
+                            </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="info_guid_links">
+                        <h4>Contact US</h4>
+                        <ul class="list-xs list-darker footerpad">
+                            <li class="box-inline"><span class="icon novi-icon icon-sm-bigger icon-primary mdi mdi-map-marker"></span>
+                              <div><a href="{{ url('/contactus') }}">Industrial Area, Phase-2, 
+                                  Chandigarh, India</a></div>
+                            </li>
+                            <li class="box-inline"><span class="icon novi-icon icon-sm-bigger icon-primary mdi mdi-phone"></span>
+                              <ul class="list-comma">                  
+                                   <li><a href="tel:9216225377">+(91)-92162-25377</a></li>
+                                  <li><a href="tel:9216325377">+(91)-92163-25377</a></li>
+
+                          </ul>
+                          </li>
+                             <li class="box-inline">  
+                              <ul class="list-comma">                  
+                                 <li> <i class="fab fa-twitter" style="color:white"></i>  <a href="{{ url('https://twitter.com/Rsmenterprises3') }}">   Twiter </a></li>
+                          </ul>
+                          </li>
+                            <li class="box-inline"><span class="icon novi-icon icon-sm-bigger icon-primary mdi mdi-email-open"></span><a href="mailto:sales@rsmenterprises.in">sales@rsmenterprises.in</a></li> 
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                  <div class="info_guid_links">
+                        <h4>Recent Blogs</h4>
+                         <div class="instafeed text-center" data-lightgallery="group">
+                            @foreach ($blogsnew as $blog)
+                                <div class="col-12">
+                                    <ul>
+                                    <li><a href="{{ url('blog/'.$blog->slug) }}" class="testimonial_center_setting">"{{ $blog->title }}"</a></li>
+                                    </ul>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="copy_right">
+            <div class="copy_right_text">
+                <p>Copyright © 2021<span></span>. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>

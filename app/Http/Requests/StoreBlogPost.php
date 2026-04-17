@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class StoreBlogPost extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'title' => 'bail|required|unique:blogs|max:125',
+            'excerpt' => 'required|max:280',
+            'description' => 'required',
+            'image' => 'required|file|max:12048|mimes:jpg,jpeg,bmp,png,gif,webp',
+            'categories' => 'required|array',
+            'user_id' => 'required|integer|exists:users,id',
+            'is_active' => 'required|boolean',
+            'allow_comments' => 'required|boolean',
+        ];
+    }
+}
