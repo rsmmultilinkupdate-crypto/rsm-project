@@ -558,6 +558,151 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         });
         </script>
         
+    <!-- Floating Buttons for Mobile -->
+    <div class="floating-buttons">
+        <!-- Scroll to Top Button -->
+        <button id="scrollToTop" class="scroll-top-btn" aria-label="Scroll to top">
+            <i class="fa fa-arrow-up"></i>
+        </button>
+        
+        <!-- WhatsApp Button -->
+        <a href="https://wa.me/919023962158" target="_blank" class="whatsapp-float" aria-label="Chat on WhatsApp">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    </div>
+
+    <style>
+        /* Floating Buttons Container */
+        .floating-buttons {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* WhatsApp Button */
+        .whatsapp-float {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+            color: white;
+        }
+
+        /* Scroll to Top Button */
+        .scroll-top-btn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+        }
+
+        .scroll-top-btn.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .scroll-top-btn:hover {
+            transform: scale(1.1) translateY(0);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Pulse Animation for WhatsApp */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(37, 211, 102, 0.7);
+            }
+            100% {
+                box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            }
+        }
+
+        /* Hide on Desktop (optional - show only on mobile) */
+        @media (min-width: 992px) {
+            .floating-buttons {
+                display: none;
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .whatsapp-float {
+                width: 55px;
+                height: 55px;
+                font-size: 28px;
+            }
+            
+            .scroll-top-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            
+            .floating-buttons {
+                bottom: 15px;
+                right: 15px;
+                gap: 12px;
+            }
+        }
+    </style>
+
+    <script>
+        // Scroll to Top functionality
+        $(document).ready(function() {
+            var scrollTopBtn = $('#scrollToTop');
+            
+            // Show/hide button based on scroll position
+            $(window).scroll(function() {
+                if ($(this).scrollTop() > 300) {
+                    scrollTopBtn.addClass('show');
+                } else {
+                    scrollTopBtn.removeClass('show');
+                }
+            });
+            
+            // Smooth scroll to top
+            scrollTopBtn.click(function() {
+                $('html, body').animate({
+                    scrollTop: 0
+                }, 600);
+                return false;
+            });
+        });
+    </script>
+        
 	</body>
 </html>
 
