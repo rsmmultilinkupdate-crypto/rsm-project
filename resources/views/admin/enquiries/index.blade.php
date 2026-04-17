@@ -21,36 +21,33 @@
                         <th>Phone</th>
                         <th>Product Name</th>
                         <th>Message</th>
+                        <th>Email Status</th>
                         <th>Date</th>
-                        
                     </tr>
                 </thead>
                 <tbody>
 				@foreach($data as $enquery)
 				<tr>
-                <td>
-				{{$enquery->id}}
-				</td>
+                <td>{{$enquery->id}}</td>
+				<td>{{$enquery->name}}</td>
+				<td>{{$enquery->email}}</td>
+				<td>{{$enquery->phone}}</td>
+				<td>{{$enquery->product_name ?? 'N/A'}}</td>
+				<td>{{Str::limit($enquery->message, 50)}}</td>
 				<td>
-				{{$enquery->name}}
-				</td>
-				<td>
-				{{$enquery->email}}
-				</td>
-				<td>
-				{{$enquery->phone}}
-				</td>
-				<td>
-				{{$enquery->product_name}}
-				</td>
-				<td>
-				{{$enquery->message}}
-				</td>
-				<td>
-				{{$enquery->created_at}}
-				</td>
+                    <span class="badge badge-{{$enquery->status_badge}}">
+                        {{$enquery->status_label}}
+                    </span>
+                    @if($enquery->status == 'sent')
+                        <br><small class="text-muted">Sent to: rsmmultilinkenquiry@gmail.com, kumarshivam827@gmail.com</small>
+                    @endif
+                    @if($enquery->status == 'failed' && $enquery->email_error)
+                        <br><small class="text-danger" title="{{$enquery->email_error}}">Error: {{Str::limit($enquery->email_error, 30)}}</small>
+                    @endif
+                </td>
+				<td>{{$enquery->created_at->format('d M Y, h:i A')}}</td>
 				</tr>
-				@endforeach; 
+				@endforeach 
 				
                 </tbody>
                

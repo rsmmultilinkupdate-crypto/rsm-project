@@ -325,21 +325,41 @@ class HomeController extends Controller
                     ];
                     $validatedData = $request->validate($rules, $messages);
             
+                    // Save to enqueries table
+                    $enquery = new Enquery;
+                    $enquery->country = $request->countryCode;
+                    $enquery->name = $request->name . ' ' . ($request->last_name ?? '');
+                    $enquery->email = $request->email;
+                    $enquery->phone = $request->phone;
+                    $enquery->product_name = 'Contact Form';
+                    $enquery->message = $request->message;
+                    $enquery->status = 'pending';
+                    $enquery->save();
+                    
                     $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => 
                     $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode); 
                     
-                   
-                     $response = Mail::send('emails.welcome',['data' => $data], function($message) use ($data)
-                      {
-                            $enquiryEmails = \App\EmailSetting::getActiveEmails('enquiry');
-                            $toEmail = !empty($enquiryEmails) ? $enquiryEmails[0] : 'rsmmultilinkenquiry@gmail.com';
-                            $ccEmails = array_slice($enquiryEmails, 1);
-                            $message->to($toEmail, env("WEBSITE_NAME"))->subject('Contact Us!');
-                            if (!empty($ccEmails)) {
-                                $message->cc($ccEmails);
-                            }
-                            $message->from('support@rsmmultilink.com',$data['name']);
-                        });
+                    try {
+                         $response = Mail::send('emails.welcome',['data' => $data], function($message) use ($data)
+                          {
+                                // Send to primary email with CC to secondary
+                                $message->to('rsmmultilinkenquiry@gmail.com', env("WEBSITE_NAME"))
+                                        ->cc('kumarshivam827@gmail.com')
+                                        ->subject('Contact Us!')
+                                        ->from('support@rsmmultilink.com', $data['name']);
+                            });
+                        
+                        // Update status to sent
+                        $enquery->status = 'sent';
+                        $enquery->save();
+                        
+                    } catch (\Exception $e) {
+                        // Update status to failed
+                        $enquery->status = 'failed';
+                        $enquery->email_error = $e->getMessage();
+                        $enquery->save();
+                        \Log::error('Contact form email failed: ' . $e->getMessage());
+                    }
             
                       
                       return redirect()->route('thank-you');     
@@ -373,7 +393,7 @@ class HomeController extends Controller
         $validatedData = $request->validate($rules, $messages);
        
         if ($validatedData) {
-            // Save Subscriber
+            // Save Enquiry
             $enquery = new Enquery;
             $enquery->country = $request->countryCode;
             $enquery->name = $request->name;
@@ -381,19 +401,32 @@ class HomeController extends Controller
             $enquery->phone = $request->phone;
             $enquery->product_name = $request->product;
             $enquery->message = $request->message;
+            $enquery->status = 'pending';
             $enquery->save();
 		
 		    $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode,"product"=>$request->product); 
 
-                    $_eq2 = \App\EmailSetting::getActiveEmails('enquiry');
-                    $_to2 = !empty($_eq2) ? $_eq2[0] : 'rsmmultilinkenquiry@gmail.com';
-                    $_cc2 = array_slice($_eq2, 1);
-                    $response = Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $_to2, $_cc2)
-                    {
-                            $message->to($_to2, env("WEBSITE_NAME"))->subject('Enquire Now!');
-                            if (!empty($_cc2)) { $message->cc($_cc2); }
-                            $message->from('support@rsmmultilink.com',$data['name']);
-                    });
+                    try {
+                        $response = Mail::send('emails.welcome',['data' => $data], function($message) use ($data)
+                        {
+                                // Send to primary email with CC to secondary
+                                $message->to('rsmmultilinkenquiry@gmail.com', env("WEBSITE_NAME"))
+                                        ->cc('kumarshivam827@gmail.com')
+                                        ->subject('Enquire Now!')
+                                        ->from('support@rsmmultilink.com', $data['name']);
+                        });
+                        
+                        // Update status to sent
+                        $enquery->status = 'sent';
+                        $enquery->save();
+                        
+                    } catch (\Exception $e) {
+                        // Update status to failed
+                        $enquery->status = 'failed';
+                        $enquery->email_error = $e->getMessage();
+                        $enquery->save();
+                        \Log::error('Enquiry email failed: ' . $e->getMessage());
+                    }
 			echo 'true';
 		}else{
 			echo "validation failed";
