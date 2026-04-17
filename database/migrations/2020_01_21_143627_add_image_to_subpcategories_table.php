@@ -13,10 +13,11 @@ class AddImageToSubpcategoriesTable extends Migration
      */
     public function up()
     {
-        Schema::table('subpcategories', function (Blueprint $table) {
-            //
-            $table->string('image')->nullable();
-        });
+        if (!Schema::hasColumn('subpcategories', 'image')) {
+            Schema::table('subpcategories', function (Blueprint $table) {
+                $table->string('image')->nullable();
+            });
+        }
     }
 
     /**
@@ -26,9 +27,10 @@ class AddImageToSubpcategoriesTable extends Migration
      */
     public function down()
     {
-        Schema::table('subpcategories', function (Blueprint $table) {
-            //
-             $table->dropColumn('image');
-        });
+        if (Schema::hasColumn('subpcategories', 'image')) {
+            Schema::table('subpcategories', function (Blueprint $table) {
+                $table->dropColumn('image');
+            });
+        }
     }
 }

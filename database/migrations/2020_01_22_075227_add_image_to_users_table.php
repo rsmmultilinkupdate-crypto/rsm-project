@@ -13,10 +13,11 @@ class AddImageToUsersTable extends Migration
      */
     public function up()
     {
-        Schema::table('pcategories', function (Blueprint $table) {
-            //
-            $table->string('image')->nullabe();
-        });
+        if (!Schema::hasColumn('users', 'image')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('image')->nullable();
+            });
+        }
     }
 
     /**
@@ -26,9 +27,10 @@ class AddImageToUsersTable extends Migration
      */
     public function down()
     {
-        Schema::table('pcategories', function (Blueprint $table) {
-            //
-              $table->dropColumn('image');
-        });
+        if (Schema::hasColumn('users', 'image')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('image');
+            });
+        }
     }
 }
