@@ -31,17 +31,15 @@ class CheckOtp
             
             try {
                 OTP::generateOTP($user, $context);
-                return redirect()->route('otp.verify');
             } catch (\Exception $e) {
-                // If OTP email fails (SMTP error), log it but allow access
+                // If OTP email fails (SMTP error), log it and show error
                 \Log::error('OTP generation failed: ' . $e->getMessage());
                 
-                // Set session as verified to bypass OTP for this request
-                $request->session()->put($sessionKey, true);
-                
-                // Show warning message
-                $request->session()->flash('warning', 'OTP email could not be sent. Please check email settings.');
+                // Redirect back with error message
+                return redirect()->back()->with('error', 'Failed to send OTP email. Please contact administrator to fix email settings.');
             }
+            
+            return redirect()->route('otp.verify');
         }
 
         return $next($request);

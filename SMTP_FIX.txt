@@ -1,0 +1,37 @@
+SMTP EMAIL FIX - Server Admin Instructions
+==========================================
+
+Current Error: "535 Incorrect authentication data"
+Email: query@rsmmultilink.com
+Host: mail.rsmmultilink.com
+
+SOLUTION OPTIONS:
+-----------------
+
+Option 1: Reset Email Password in cPanel
+1. Login to cPanel
+2. Go to "Email Accounts"
+3. Find: query@rsmmultilink.com
+4. Click "Manage" or "Change Password"
+5. Set new password (without special characters like { } " )
+6. Update .env file on server with new password:
+   MAIL_PASSWORD=new_password_here
+
+Option 2: Test Current Password
+Run this command on server to test SMTP:
+php artisan tinker
+Mail::raw('Test', function($m) { $m->to('test@example.com')->subject('Test'); });
+
+Option 3: Use Different Email Account
+Create new email account in cPanel with simple password
+Update .env:
+MAIL_USERNAME=newemail@rsmmultilink.com
+MAIL_PASSWORD=simple_password
+
+After fixing, run:
+php artisan config:clear
+php artisan cache:clear
+
+Then test OTP pages:
+https://rsmmultilink.com/admin/enquiry
+https://rsmmultilink.com/admin/email-settings
