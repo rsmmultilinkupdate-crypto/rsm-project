@@ -124,17 +124,13 @@ try {
         unlink($zipFile);
     }
     
-    // Step 5: Run Laravel commands (optional)
+    // Step 5: Run Laravel commands
     logMessage("Running Laravel commands...");
     chdir($extractPath);
     
-    // Run migrations
+    // Run migrations (will auto-seed email_settings)
     exec("php artisan migrate --force 2>&1", $outputMigrate, $returnMigrate);
     logMessage("Migrations: " . implode("\n", $outputMigrate));
-    
-    // Seed email settings if table is empty
-    exec("php artisan db:seed --class=EmailSettingsSeeder --force 2>&1", $outputSeed, $returnSeed);
-    logMessage("Email Settings Seeder: " . implode("\n", $outputSeed));
     
     // Clear cache
     exec("php artisan cache:clear 2>&1", $output1, $return1);
