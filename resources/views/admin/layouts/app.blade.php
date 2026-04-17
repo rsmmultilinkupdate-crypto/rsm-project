@@ -54,7 +54,7 @@
                             <li><a class="nav-link" href="{{ route('comments.index') }}">Comments</a></li>
                             <li><a class="nav-link" href="{{ route('users.index') }}">Users</a></li>
                             <li><a class="nav-link" href="{{ route('settings.index') }}">Settings</a></li>
-                            <li><a class="nav-link" href="{{ route('email-settings.index') }}">Email Settings</a></li>
+                            <li><a class="nav-link" href="{{ route('email-recipients.index') }}">Email Recipients</a></li>
                             <li><a class="nav-link" href="{{ route('subscribers.index') }}">Subscribers</a></li>
                             <li><a class="nav-link" href="{{ route('enquiry.index') }}">Enquiries</a></li>
 
