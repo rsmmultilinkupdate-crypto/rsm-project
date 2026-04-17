@@ -168,7 +168,11 @@
          } 
          .desktop-version { 
          display: none; 
-         } 
+         }
+         /* Hide phone and WhatsApp icons in mobile header */
+         .mobile-header .header-contact-info {
+         display: none !important;
+         }
          }
          
          @media (max-width: 575px) {
@@ -562,7 +566,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="floating-buttons">
         <!-- Scroll to Top Button -->
         <button id="scrollToTop" class="scroll-top-btn" aria-label="Scroll to top">
-            <i class="fa fa-arrow-up"></i>
+            <i class="fas fa-arrow-up"></i>
         </button>
         
         <!-- WhatsApp Button -->
@@ -577,7 +581,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             position: fixed;
             bottom: 20px;
             right: 20px;
-            z-index: 9999;
+            z-index: 99999 !important;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -588,7 +592,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             width: 60px;
             height: 60px;
             background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
-            color: white;
+            color: white !important;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -603,7 +607,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         .whatsapp-float:hover {
             transform: scale(1.1);
             box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
-            color: white;
+            color: white !important;
+            text-decoration: none;
         }
 
         /* Scroll to Top Button */
