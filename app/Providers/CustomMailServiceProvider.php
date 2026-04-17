@@ -25,34 +25,43 @@ class CustomMailServiceProvider extends ServiceProvider
     public function boot()
     {
         try {
-            // Set mail configuration with proper handling of special characters
+            // Get password from env and handle special characters properly
             $password = env('MAIL_PASSWORD');
             
-            // Remove quotes if present
+            // Remove surrounding quotes if present
             $password = trim($password, '"\'');
             
-            // Log for debugging (remove in production)
-            \Log::info('Mail Config', [
+            // Set mail configuration
+            Config::set('mail.mailers.smtp', [
+                'transport' => 'smtp',
                 'host' => env('MAIL_HOST'),
                 'port' => env('MAIL_PORT'),
-                'username' => env('MAIL_USERNAME'),
                 'encryption' => env('MAIL_ENCRYPTION'),
-                'password_length' => strlen($password),
+                'username' => env('MAIL_USERNAME'),
+                'password' => $password,
+                'timeout' => null,
+                'local_domain' => env('MAIL_EHLO_DOMAIN'),
             ]);
             
-            Config::set('mail.password', $password);
-            Config::set('mail.username', env('MAIL_USERNAME'));
-            Config::set('mail.host', env('MAIL_HOST'));
-            Config::set('mail.port', env('MAIL_PORT'));
-            Config::set('mail.encryption', env('MAIL_ENCRYPTION'));
+            Config::set('mail.from', [
+                'address' => env('MAIL_FROM_ADDRESS'),
+                'name' => env('MAIL_FROM_NAME'),
+            ]);
             
-            // Set stream options for SSL
+            // Set stream options for better SSL/TLS handling
             Config::set('mail.stream', [
                 'ssl' => [
                     'allow_self_signed' => true,
                     'verify_peer' => false,
                     'verify_peer_name' => false,
                 ],
+            ]);
+            
+            \Log::info('Mail configured successfully', [
+                'host' => env('MAIL_HOST'),
+                'port' => env('MAIL_PORT'),
+                'username' => env('MAIL_USERNAME'),
+                'encryption' => env('MAIL_ENCRYPTION'),
             ]);
         } catch (\Exception $e) {
             \Log::error('CustomMailServiceProvider error: ' . $e->getMessage());
