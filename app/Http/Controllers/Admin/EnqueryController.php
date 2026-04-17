@@ -26,9 +26,13 @@ class EnqueryController extends Controller
     }
 	public function index()
     {
-		
-        $enquiries = Enquery::orderBy('id', 'desc')->get();
-		return view('admin/enquiries/index',['data'=>$enquiries]);
+		try {
+            $enquiries = Enquery::orderBy('id', 'desc')->get();
+		    return view('admin/enquiries/index',['data'=>$enquiries]);
+        } catch (\Exception $e) {
+            \Log::error('Enquiry index error: ' . $e->getMessage());
+            return view('admin/enquiries/index',['data'=>collect()]);
+        }
     }
 
     public function show($id)

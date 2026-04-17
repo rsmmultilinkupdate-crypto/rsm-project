@@ -17,14 +17,20 @@ class EmailSetting extends Model
      */
     public static function getActiveEmails($type = null)
     {
-        $query = self::where('is_active', 1);
+        try {
+            $query = self::where('is_active', 1);
 
-        if ($type) {
-            $query->where(function($q) use ($type) {
-                $q->where('type', $type)->orWhere('type', 'both');
-            });
+            if ($type) {
+                $query->where(function($q) use ($type) {
+                    $q->where('type', $type)->orWhere('type', 'both');
+                });
+            }
+
+            return $query->pluck('email')->toArray();
+        } catch (\Exception $e) {
+            // If table doesn't exist or query fails, return empty array
+            \Log::error('Failed to get active emails: ' . $e->getMessage());
+            return [];
         }
-
-        return $query->pluck('email')->toArray();
     }
 }

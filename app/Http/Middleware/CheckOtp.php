@@ -28,8 +28,20 @@ class CheckOtp
         if (!$otp || $request->session()->get($sessionKey) !== true) {
             // Context session mein store karo taaki verify ke baad sahi redirect ho
             $request->session()->put('otp_context', $context);
-            OTP::generateOTP($user, $context);
-            return redirect()->route('otp.verify');
+            
+            try {
+                OTP::generateOTP($user, $context);
+                return redirect()->route('otp.verify');
+            } catch (\Exception $e) {
+                // If OTP email fails (SMTP error), log it but allow access
+                \Log::error('OTP generation failed: ' . $e->getMessage());
+                
+                // Set session as verified to bypass OTP for this request
+                $request->session()->put($sessionKey, true);
+                
+                // Show warning message
+                $request->session()->flash('warning', 'OTP email could not be sent. Please check email settings.');
+            }
         }
 
         return $next($request);

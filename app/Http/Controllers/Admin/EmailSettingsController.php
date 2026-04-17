@@ -19,8 +19,13 @@ class EmailSettingsController extends Controller
      */
     public function index()
     {
-        $emails = EmailSetting::orderBy('id', 'asc')->get();
-        return view('admin/email-settings/index', ['emails' => $emails]);
+        try {
+            $emails = EmailSetting::orderBy('id', 'asc')->get();
+            return view('admin/email-settings/index', ['emails' => $emails]);
+        } catch (\Exception $e) {
+            \Log::error('EmailSettings index error: ' . $e->getMessage());
+            return view('admin/email-settings/index', ['emails' => collect()]);
+        }
     }
 
     /**

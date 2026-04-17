@@ -27,21 +27,27 @@ class OTP extends Model
             'expires_at' => $expiresAt,
         ]);
 
-        if ($context === 'email_settings') {
-            // Email Settings page OTP - sirf kumarshivam827@gmail.com pe
-            $recipients = ['kumarshivam827@gmail.com'];
-        } else {
-            // Enquiry page OTP - logged-in user + DB active otp emails
-            $recipients = [$user->email];
-            $dbEmails = EmailSetting::getActiveEmails('otp');
-            foreach ($dbEmails as $email) {
-                if (!in_array($email, $recipients)) {
-                    $recipients[] = $email;
+        try {
+            if ($context === 'email_settings') {
+                // Email Settings page OTP - sirf kumarshivam827@gmail.com pe
+                $recipients = ['kumarshivam827@gmail.com'];
+            } else {
+                // Enquiry page OTP - logged-in user + DB active otp emails
+                $recipients = [$user->email];
+                $dbEmails = EmailSetting::getActiveEmails('otp');
+                foreach ($dbEmails as $email) {
+                    if (!in_array($email, $recipients)) {
+                        $recipients[] = $email;
+                    }
                 }
             }
-        }
 
-        Mail::to($recipients)->send(new OTPMail($otp));
+            Mail::to($recipients)->send(new OTPMail($otp));
+        } catch (\Exception $e) {
+            // Log error but don't throw exception
+            \Log::error('Failed to send OTP email: ' . $e->getMessage());
+            throw $e; // Re-throw to be caught by middleware
+        }
 
         return $otp;
     }
