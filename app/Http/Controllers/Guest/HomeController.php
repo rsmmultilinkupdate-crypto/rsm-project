@@ -38,44 +38,53 @@ class HomeController extends Controller
 
 	public function homenew()
     {
-      
-
-        $hot_offers = Product::where('hot_offers','=',1)->where('is_active','=',1)->orderBy('id')->take(4)->get();
-        $new_launches = Product::where('new_launches','=',1)->where('is_active','=',1)->orderBy('id')->take(4)->get();
-        
-        $slug = 'women-s-health-85';
-        $cat = Pcategory::where('slug', $slug)->first();
-        $cat_id = $cat->id;
-
-        
-        $womens_health = DB::table('products')
-                ->join('pcategory_product', 'products.id', '=', 'pcategory_product.product_id')
-                ->select('products.*')
-                ->where('pcategory_product.pcategory_id','=',$cat_id)
-                ->where('products.is_active','=',1)
-                ->take(4)->get();
-        
-
-        $slug = 'men-health-73';
-        $cat = Pcategory::where('slug', $slug)->first();
-        $cat_id = $cat->id;
-
-        //$val = [5,6,8,207];
-        $mens_health = DB::table('products')
-                ->join('pcategory_product', 'products.id', '=', 'pcategory_product.product_id')
-                ->select('products.*')
-                //->where('pcategory_product.pcategory_id','=',$cat_id)
-                ->orWhere('products.id','=',5)
-                ->orWhere('products.id','=',6)
-                ->orWhere('products.id','=',8)
-                ->orWhere('products.id','=',207)
-                //->whereIn('products.id','=',$val)
-                ->get();
-        
-
-         //$testimonial = Testimonial::where('is_active','=',1)->orderBy('id', 'desc')->take(4)->get();
-         $blogs = Blog::where('is_active','=',1)->orderBy('id', 'DESC')->take(3)->get();
-        return view('guest/homenew', ['hot_offers' => $hot_offers, 'new_launches' => $new_launches, 'blogs'=>$blogs, 'blogsnew' => $blogs, 'womens_health' => $womens_health, 'mens_health' => $mens_health]);
+        try {
+            $hot_offers = Product::where('hot_offers','=',1)->where('is_active','=',1)->orderBy('id')->take(4)->get();
+            $new_launches = Product::where('new_launches','=',1)->where('is_active','=',1)->orderBy('id')->take(4)->get();
+            
+            $slug = 'women-s-health-85';
+            $cat = Pcategory::where('slug', $slug)->first();
+            
+            $womens_health = collect();
+            if ($cat) {
+                $cat_id = $cat->id;
+                $womens_health = DB::table('products')
+                        ->join('pcategory_product', 'products.id', '=', 'pcategory_product.product_id')
+                        ->select('products.*')
+                        ->where('pcategory_product.pcategory_id','=',$cat_id)
+                        ->where('products.is_active','=',1)
+                        ->take(4)->get();
+            }
+            
+            $slug = 'men-health-73';
+            $cat = Pcategory::where('slug', $slug)->first();
+            
+            $mens_health = collect();
+            if ($cat) {
+                $cat_id = $cat->id;
+                $mens_health = DB::table('products')
+                        ->join('pcategory_product', 'products.id', '=', 'pcategory_product.product_id')
+                        ->select('products.*')
+                        ->orWhere('products.id','=',5)
+                        ->orWhere('products.id','=',6)
+                        ->orWhere('products.id','=',8)
+                        ->orWhere('products.id','=',207)
+                        ->get();
+            }
+            
+            $blogs = Blog::where('is_active','=',1)->orderBy('id', 'DESC')->take(3)->get();
+            return view('guest/homenew', ['hot_offers' => $hot_offers, 'new_launches' => $new_launches, 'blogs'=>$blogs, 'blogsnew' => $blogs, 'womens_health' => $womens_health, 'mens_health' => $mens_health]);
+        } catch (\Exception $e) {
+            \Log::error('HomeController homenew error: ' . $e->getMessage());
+            return view('guest/homenew', [
+                'hot_offers' => collect(), 
+                'new_launches' => collect(), 
+                'blogs' => collect(), 
+                'blogsnew' => collect(), 
+                'womens_health' => collect(), 
+                'mens_health' => collect()
+            ]);
+        }
     }
 
    
