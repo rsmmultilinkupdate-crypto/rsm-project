@@ -11,7 +11,7 @@ use App\Pcategory;
 use App\Subpcategory;
 use App\Subscriber;
 use App\Enquery;
-use App\EmailSetting;
+use App\EmailRecipient;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -340,13 +340,23 @@ class HomeController extends Controller
                     $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode); 
                     
                     try {
-                         $response = Mail::send('emails.welcome',['data' => $data], function($message) use ($data)
+                         // Get active email recipients
+                         $recipients = EmailRecipient::getActiveEmails();
+                         if (empty($recipients)) {
+                             $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
+                         }
+                         $toEmail = $recipients[0];
+                         $ccEmails = array_slice($recipients, 1);
+                         
+                         // Try SMTP first with timeout
+                         Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails)
                           {
-                                // Send to primary email with CC to secondary
-                                $message->to('rsmmultilinkenquiry@gmail.com', env("WEBSITE_NAME"))
-                                        ->cc('kumarshivam827@gmail.com')
+                                $message->to($toEmail, env("WEBSITE_NAME"))
                                         ->subject('Contact Us!')
                                         ->from('support@rsmmultilink.com', $data['name']);
+                                if (!empty($ccEmails)) {
+                                    $message->cc($ccEmails);
+                                }
                             });
                         
                         // Update status to sent
@@ -354,11 +364,45 @@ class HomeController extends Controller
                         $enquery->save();
                         
                     } catch (\Exception $e) {
-                        // Update status to failed
-                        $enquery->status = 'failed';
-                        $enquery->email_error = $e->getMessage();
-                        $enquery->save();
-                        \Log::error('Contact form email failed: ' . $e->getMessage());
+                        // SMTP failed, try PHP mail() as fallback
+                        \Log::warning('SMTP failed for contact form, trying PHP mail(): ' . $e->getMessage());
+                        
+                        try {
+                            $recipients = EmailRecipient::getActiveEmails();
+                            if (empty($recipients)) {
+                                $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
+                            }
+                            
+                            $subject = 'Contact Us!';
+                            $message = "New Contact Form Submission\n\n";
+                            $message .= "Name: " . $data['name'] . "\n";
+                            $message .= "Email: " . $data['email'] . "\n";
+                            $message .= "Phone: " . $data['countryCode'] . " " . $data['phone'] . "\n";
+                            $message .= "Message: " . $data['message'] . "\n\n";
+                            $message .= "---\nRSM Multilink\nwww.rsmmultilink.com";
+                            
+                            $headers = "From: RSM Website <noreply@rsmmultilink.com>\r\n";
+                            $headers .= "Reply-To: " . $data['email'] . "\r\n";
+                            if (count($recipients) > 1) {
+                                $headers .= "Cc: " . implode(', ', array_slice($recipients, 1)) . "\r\n";
+                            }
+                            $headers .= "MIME-Version: 1.0\r\n";
+                            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                            
+                            if (mail($recipients[0], $subject, $message, $headers)) {
+                                $enquery->status = 'sent';
+                                $enquery->save();
+                                \Log::info('Contact form email sent via PHP mail()');
+                            } else {
+                                throw new \Exception('PHP mail() also failed');
+                            }
+                        } catch (\Exception $e2) {
+                            // Both failed
+                            $enquery->status = 'failed';
+                            $enquery->email_error = 'SMTP: ' . $e->getMessage() . ' | PHP mail: ' . $e2->getMessage();
+                            $enquery->save();
+                            \Log::error('Both SMTP and PHP mail failed for contact form');
+                        }
                     }
             
                       
@@ -407,13 +451,23 @@ class HomeController extends Controller
 		    $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode,"product"=>$request->product); 
 
                     try {
-                        $response = Mail::send('emails.welcome',['data' => $data], function($message) use ($data)
+                        // Get active email recipients
+                        $recipients = EmailRecipient::getActiveEmails();
+                        if (empty($recipients)) {
+                            $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
+                        }
+                        $toEmail = $recipients[0];
+                        $ccEmails = array_slice($recipients, 1);
+                        
+                        // Try SMTP first with timeout
+                        Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails)
                         {
-                                // Send to primary email with CC to secondary
-                                $message->to('rsmmultilinkenquiry@gmail.com', env("WEBSITE_NAME"))
-                                        ->cc('kumarshivam827@gmail.com')
+                                $message->to($toEmail, env("WEBSITE_NAME"))
                                         ->subject('Enquire Now!')
                                         ->from('support@rsmmultilink.com', $data['name']);
+                                if (!empty($ccEmails)) {
+                                    $message->cc($ccEmails);
+                                }
                         });
                         
                         // Update status to sent
@@ -421,11 +475,46 @@ class HomeController extends Controller
                         $enquery->save();
                         
                     } catch (\Exception $e) {
-                        // Update status to failed
-                        $enquery->status = 'failed';
-                        $enquery->email_error = $e->getMessage();
-                        $enquery->save();
-                        \Log::error('Enquiry email failed: ' . $e->getMessage());
+                        // SMTP failed, try PHP mail() as fallback
+                        \Log::warning('SMTP failed for enquiry, trying PHP mail(): ' . $e->getMessage());
+                        
+                        try {
+                            $recipients = EmailRecipient::getActiveEmails();
+                            if (empty($recipients)) {
+                                $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
+                            }
+                            
+                            $subject = 'Enquire Now!';
+                            $message = "New Enquiry from Website\n\n";
+                            $message .= "Name: " . $data['name'] . "\n";
+                            $message .= "Email: " . $data['email'] . "\n";
+                            $message .= "Phone: " . $data['countryCode'] . " " . $data['phone'] . "\n";
+                            $message .= "Product: " . $data['product'] . "\n";
+                            $message .= "Message: " . $data['message'] . "\n\n";
+                            $message .= "---\nRSM Multilink\nwww.rsmmultilink.com";
+                            
+                            $headers = "From: RSM Website <noreply@rsmmultilink.com>\r\n";
+                            $headers .= "Reply-To: " . $data['email'] . "\r\n";
+                            if (count($recipients) > 1) {
+                                $headers .= "Cc: " . implode(', ', array_slice($recipients, 1)) . "\r\n";
+                            }
+                            $headers .= "MIME-Version: 1.0\r\n";
+                            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                            
+                            if (mail($recipients[0], $subject, $message, $headers)) {
+                                $enquery->status = 'sent';
+                                $enquery->save();
+                                \Log::info('Enquiry email sent via PHP mail()');
+                            } else {
+                                throw new \Exception('PHP mail() also failed');
+                            }
+                        } catch (\Exception $e2) {
+                            // Both failed
+                            $enquery->status = 'failed';
+                            $enquery->email_error = 'SMTP: ' . $e->getMessage() . ' | PHP mail: ' . $e2->getMessage();
+                            $enquery->save();
+                            \Log::error('Both SMTP and PHP mail failed for enquiry');
+                        }
                     }
 			echo 'true';
 		}else{

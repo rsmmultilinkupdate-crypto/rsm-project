@@ -167,17 +167,15 @@ Route::prefix('admin')->group(function () {
 		})->name('sitemap.form');
 	Route::post('upload-sitemap', [SitemapController::class, 'upload'])->name('sitemap.upload');
 
-    // Email Settings - auth only (OTP removed)
-    Route::get('email-settings', 'Admin\EmailSettingsController@index')->name('email-settings.index')->middleware('auth');
-    Route::post('email-settings', 'Admin\EmailSettingsController@store')->name('email-settings.store')->middleware('auth');
-    Route::put('email-settings/{id}', 'Admin\EmailSettingsController@update')->name('email-settings.update')->middleware('auth');
-    Route::delete('email-settings/{id}', 'Admin\EmailSettingsController@destroy')->name('email-settings.destroy')->middleware('auth');
-    Route::get('email-settings/{id}/toggle', 'Admin\EmailSettingsController@toggleStatus')->name('email-settings.toggle')->middleware('auth');
-    Route::post('email-settings/test-mail', 'Admin\EmailSettingsController@sendTestMail')->name('email-settings.test-mail')->middleware('auth');
+    // Email Recipients Management
+    Route::get('email-recipients', 'Admin\EmailRecipientsController@index')->name('email-recipients.index');
+    Route::post('email-recipients', 'Admin\EmailRecipientsController@store')->name('email-recipients.store');
+    Route::put('email-recipients/{id}', 'Admin\EmailRecipientsController@update')->name('email-recipients.update');
+    Route::delete('email-recipients/{id}', 'Admin\EmailRecipientsController@destroy')->name('email-recipients.destroy');
+    Route::get('email-recipients/{id}/toggle', 'Admin\EmailRecipientsController@toggleStatus')->name('email-recipients.toggle');
     
     // Email Logs - View email send history
-    Route::get('email-logs', 'Admin\EmailLogsController@index')->name('email-logs.index')->middleware('role:manage_settings');
-    Route::post('email-logs/clear', 'Admin\EmailLogsController@clear')->name('email-logs.clear')->middleware('role:manage_settings');
+    Route::get('email-logs', 'Admin\EnqueryController@index')->name('email-logs.index')->middleware('role:manage_settings');
 });
 
 
