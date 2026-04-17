@@ -53,9 +53,16 @@ class OTP extends Model
                 foreach ($recipients as $recipient) {
                     $subject = 'RSM Admin - OTP Verification';
                     $message = "Your OTP for RSM Admin Panel is: $otp\n\nThis OTP will expire in 10 minutes.\n\nIf you did not request this, please ignore this email.";
-                    $headers = "From: query@rsmmultilink.com\r\n";
-                    $headers .= "Reply-To: query@rsmmultilink.com\r\n";
-                    $headers .= "X-Mailer: PHP/" . phpversion();
+                    
+                    // Proper headers for better deliverability
+                    $headers = "From: RSM Admin <noreply@rsmmultilink.com>\r\n";
+                    $headers .= "Reply-To: noreply@rsmmultilink.com\r\n";
+                    $headers .= "Return-Path: noreply@rsmmultilink.com\r\n";
+                    $headers .= "MIME-Version: 1.0\r\n";
+                    $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+                    $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+                    $headers .= "X-Priority: 1\r\n";
+                    $headers .= "Importance: High\r\n";
                     
                     if (mail($recipient, $subject, $message, $headers)) {
                         \Log::info("OTP sent via PHP mail() to: $recipient");
