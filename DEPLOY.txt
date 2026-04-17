@@ -2,33 +2,16 @@
   DEPLOYMENT COMMAND
 ═══════════════════════════════════════════════════════════════
 
-cd /home/rsmmultilink/public_html && curl "https://rsmmultilink.com/webhook.php?key=rsm123" && sleep 5 && php artisan migrate --force && rm -rf storage/framework/views/* && php artisan cache:clear && php artisan config:clear && php artisan view:clear && echo "✓ Done!"
+cd /home/rsmmultilink/public_html && curl "https://rsmmultilink.com/webhook.php?key=rsm123" && sleep 5 && php artisan config:clear && php artisan cache:clear && php artisan view:clear && echo "✓ Done! Now test form"
 
 ═══════════════════════════════════════════════════════════════
-  WHAT'S FIXED
+  SMTP FIX - Port 587 with TLS
 ═══════════════════════════════════════════════════════════════
 
-✅ EMAIL DELIVERY - Now using SMTP properly (query@rsmmultilink.com)
-✅ INBOX DELIVERY - Emails will reach inbox, not spam
-✅ ADMIN DASHBOARD - 500 error fixed
-✅ EMAIL MANAGEMENT - /admin/email-recipients working
+Changed:
+- Port: 465 → 587
+- Encryption: SSL → TLS  
+- Password: Quoted "v8{hh6zMJsDU"
 
-✅ Email Configuration:
-   - SMTP Host: mail.rsmmultilink.com
-   - Port: 465 (SSL)
-   - Username: query@rsmmultilink.com
-   - From: query@rsmmultilink.com
-   - Reply-To: Customer's email
-
-✅ Email Recipients:
-   - rsmmultilinkenquiry@gmail.com (TO)
-   - kumarshivam827@gmail.com (CC)
-
-✅ Features:
-   - Proper SMTP authentication
-   - No PHP mail() fallback
-   - Better subject lines
-   - Reply-To customer email
-   - Error logging
-
+This will fix authentication error!
 ═══════════════════════════════════════════════════════════════
