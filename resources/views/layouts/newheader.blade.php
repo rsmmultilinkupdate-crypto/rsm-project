@@ -103,6 +103,8 @@
      {{-- recaptcha loaded per-page --}} 
     @endif -->
         <link rel="stylesheet" href="{{ asset('css/fontawesome-all.min.css') }}">
+        <!-- FontAwesome CDN Backup -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 		<link rel="stylesheet" href="{{ asset('css2/style.css') }}">
 		<link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" >
 		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -566,12 +568,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div class="floating-buttons">
         <!-- Scroll to Top Button -->
         <button id="scrollToTop" class="scroll-top-btn" aria-label="Scroll to top">
-            <i class="fas fa-arrow-up"></i>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 19V5M12 5L5 12M12 5L19 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
         </button>
         
         <!-- WhatsApp Button -->
         <a href="https://wa.me/919023962158" target="_blank" class="whatsapp-float" aria-label="Chat on WhatsApp">
-            <i class="fab fa-whatsapp"></i>
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M27.281 4.65C24.318 1.686 20.404 0.062 16.238 0C7.406 0 0.194 7.21 0.19 16.044C0.188 18.862 0.914 21.614 2.296 24.046L0.062 32L8.204 29.804C10.55 31.074 13.174 31.744 15.844 31.746H15.852C24.682 31.746 31.896 24.534 31.9 15.7C31.902 11.538 30.28 7.626 27.281 4.65ZM16.238 29.084H16.232C13.852 29.082 11.518 28.444 9.482 27.238L8.986 26.944L3.886 28.268L5.234 23.294L4.912 22.778C3.588 20.664 2.888 18.234 2.89 15.744C2.894 8.702 8.596 3 15.638 3C19.052 3.002 22.254 4.332 24.678 6.758C27.102 9.184 28.43 12.388 28.428 15.802C28.424 22.844 22.722 29.084 16.238 29.084ZM22.69 19.002C22.332 18.822 20.562 17.952 20.228 17.832C19.894 17.712 19.652 17.652 19.41 18.012C19.168 18.372 18.478 19.182 18.266 19.424C18.054 19.666 17.842 19.696 17.484 19.516C17.126 19.336 15.954 18.948 14.566 17.718C13.486 16.76 12.754 15.578 12.542 15.22C12.33 14.862 12.52 14.664 12.7 14.484C12.862 14.322 13.058 14.064 13.238 13.852C13.418 13.64 13.478 13.488 13.598 13.246C13.718 13.004 13.658 12.792 13.568 12.612C13.478 12.432 12.748 10.66 12.444 9.944C12.148 9.248 11.848 9.342 11.626 9.332C11.414 9.322 11.172 9.32 10.93 9.32C10.688 9.32 10.3 9.41 9.966 9.768C9.632 10.126 8.702 10.996 8.702 12.768C8.702 14.54 10.026 16.252 10.206 16.494C10.386 16.736 12.752 20.388 16.384 21.956C17.228 22.332 17.886 22.564 18.398 22.738C19.244 23.012 20.016 22.972 20.626 22.88C21.308 22.776 22.69 22.016 22.994 21.186C23.298 20.356 23.298 19.646 23.208 19.496C23.118 19.346 22.876 19.256 22.518 19.076L22.69 19.002Z" fill="currentColor"/>
+            </svg>
         </a>
     </div>
 
@@ -597,11 +603,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
             box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
             text-decoration: none;
             transition: all 0.3s ease;
             animation: pulse 2s infinite;
+        }
+        
+        .whatsapp-float svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
         }
 
         .whatsapp-float:hover {
@@ -622,13 +633,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
             cursor: pointer;
             transition: all 0.3s ease;
             opacity: 0;
             visibility: hidden;
             transform: translateY(20px);
+        }
+        
+        .scroll-top-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: white;
         }
 
         .scroll-top-btn.show {
@@ -667,13 +683,21 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             .whatsapp-float {
                 width: 55px;
                 height: 55px;
-                font-size: 28px;
+            }
+            
+            .whatsapp-float svg {
+                width: 28px;
+                height: 28px;
             }
             
             .scroll-top-btn {
                 width: 45px;
                 height: 45px;
-                font-size: 18px;
+            }
+            
+            .scroll-top-btn svg {
+                width: 20px;
+                height: 20px;
             }
             
             .floating-buttons {
