@@ -585,7 +585,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         /* Floating Buttons Container */
         .floating-buttons {
             position: fixed;
-            bottom: 20px;
+            bottom: 80px;
             right: 20px;
             z-index: 99999 !important;
             display: flex;
@@ -701,7 +701,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             }
             
             .floating-buttons {
-                bottom: 15px;
+                bottom: 75px;
                 right: 15px;
                 gap: 12px;
             }
