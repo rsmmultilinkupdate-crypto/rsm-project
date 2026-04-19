@@ -348,14 +348,30 @@ class HomeController extends Controller
                     $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => 
                     $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode); 
                     
-                    // Dispatch email job to queue for fast response
-                    SendEnquiryEmail::dispatch(
-                        $enquery->id,
-                        $data,
-                        $toEmail,
-                        $ccEmails,
-                        'Contact Us - New Enquiry'
-                    );
+                    // Send email directly (synchronous) - Fast with optimized SMTP
+                    try {
+                        Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails) {
+                            $message->to($toEmail, 'RSM Multilink')
+                                    ->subject('Contact Us - New Enquiry')
+                                    ->from(config('mail.from.address'), 'RSM Website');
+                            if (!empty($ccEmails)) {
+                                $message->cc($ccEmails);
+                            }
+                            $message->replyTo($data['email'], $data['name']);
+                        });
+                        
+                        // Update status to sent
+                        $enquery->status = 'sent';
+                        $enquery->save();
+                        \Log::info('Contact form email sent successfully', ['to' => $toEmail, 'cc' => $ccEmails]);
+                        
+                    } catch (\Exception $e) {
+                        // Email failed
+                        $enquery->status = 'failed';
+                        $enquery->email_error = $e->getMessage();
+                        $enquery->save();
+                        \Log::error('Contact form email failed: ' . $e->getMessage());
+                    }
             
                     return redirect()->route('thank-you');     
                         
@@ -409,14 +425,30 @@ class HomeController extends Controller
             
             $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode,"product"=>$request->product); 
 
-            // Dispatch email job to queue for fast response
-            SendEnquiryEmail::dispatch(
-                $enquery->id,
-                $data,
-                $toEmail,
-                $ccEmails,
-                'Enquire Now - Product Enquiry'
-            );
+            // Send email directly (synchronous) - Fast with optimized SMTP
+            try {
+                Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails) {
+                    $message->to($toEmail, 'RSM Multilink')
+                            ->subject('Enquire Now - Product Enquiry')
+                            ->from(config('mail.from.address'), 'RSM Website');
+                    if (!empty($ccEmails)) {
+                        $message->cc($ccEmails);
+                    }
+                    $message->replyTo($data['email'], $data['name']);
+                });
+                
+                // Update status to sent
+                $enquery->status = 'sent';
+                $enquery->save();
+                \Log::info('Enquiry email sent successfully', ['to' => $toEmail, 'cc' => $ccEmails]);
+                
+            } catch (\Exception $e) {
+                // Email failed
+                $enquery->status = 'failed';
+                $enquery->email_error = $e->getMessage();
+                $enquery->save();
+                \Log::error('Enquiry email failed: ' . $e->getMessage());
+            }
             
 			echo 'true';
 		}else{
