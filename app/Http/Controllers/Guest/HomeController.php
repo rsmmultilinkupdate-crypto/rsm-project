@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 use App\Jobs\SendSubscriptionVerificationEmail;
+use App\Jobs\SendEnquiryEmail;
 use App\Listeners\EmailSubscribedListener;
 use DB;
 use Mail;
@@ -347,34 +348,16 @@ class HomeController extends Controller
                     $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => 
                     $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode); 
                     
-                    try {
-                         // Use SMTP with proper configuration
-                         Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails)
-                          {
-                                $message->to($toEmail, 'RSM Multilink')
-                                        ->subject('Contact Us - New Enquiry')
-                                        ->from(config('mail.from.address'), 'RSM Website');
-                                if (!empty($ccEmails)) {
-                                    $message->cc($ccEmails);
-                                }
-                                $message->replyTo($data['email'], $data['name']);
-                            });
-                        
-                        // Update status to sent
-                        $enquery->status = 'sent';
-                        $enquery->save();
-                        \Log::info('Contact form email sent successfully', ['to' => $toEmail, 'cc' => $ccEmails]);
-                        
-                    } catch (\Exception $e) {
-                        // Email failed
-                        $enquery->status = 'failed';
-                        $enquery->email_error = $e->getMessage();
-                        $enquery->save();
-                        \Log::error('Contact form email failed: ' . $e->getMessage());
-                    }
+                    // Dispatch email job to queue for fast response
+                    SendEnquiryEmail::dispatch(
+                        $enquery->id,
+                        $data,
+                        $toEmail,
+                        $ccEmails,
+                        'Contact Us - New Enquiry'
+                    );
             
-                      
-                      return redirect()->route('thank-you');     
+                    return redirect()->route('thank-you');     
                         
             } else {
                  
@@ -426,31 +409,15 @@ class HomeController extends Controller
             
             $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode,"product"=>$request->product); 
 
-                    try {
-                        // Use SMTP with proper configuration
-                        Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails)
-                        {
-                                $message->to($toEmail, 'RSM Multilink')
-                                        ->subject('Enquire Now - Product Enquiry')
-                                        ->from(config('mail.from.address'), 'RSM Website');
-                                if (!empty($ccEmails)) {
-                                    $message->cc($ccEmails);
-                                }
-                                $message->replyTo($data['email'], $data['name']);
-                        });
-                        
-                        // Update status to sent
-                        $enquery->status = 'sent';
-                        $enquery->save();
-                        \Log::info('Enquiry email sent successfully', ['to' => $toEmail, 'cc' => $ccEmails]);
-                        
-                    } catch (\Exception $e) {
-                        // Email failed
-                        $enquery->status = 'failed';
-                        $enquery->email_error = $e->getMessage();
-                        $enquery->save();
-                        \Log::error('Enquiry email failed: ' . $e->getMessage());
-                    }
+            // Dispatch email job to queue for fast response
+            SendEnquiryEmail::dispatch(
+                $enquery->id,
+                $data,
+                $toEmail,
+                $ccEmails,
+                'Enquire Now - Product Enquiry'
+            );
+            
 			echo 'true';
 		}else{
 			echo "validation failed";
