@@ -334,7 +334,7 @@ class HomeController extends Controller
                     $enquery->phone = $request->phone;
                     $enquery->product_name = 'Contact Form';
                     $enquery->message = $request->message;
-                    $enquery->status = 'pending';
+                    $enquery->status = 'sent'; // Mark as sent immediately
                     $enquery->save();
                     
                     // Get active email recipients
@@ -342,36 +342,23 @@ class HomeController extends Controller
                     if (empty($recipients)) {
                         $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
                     }
-                    $toEmail = $recipients[0];
-                    $ccEmails = array_slice($recipients, 1);
                     
-                    $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => 
-                    $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode); 
+                    // Use PHP mail() for instant delivery - No SMTP delays
+                    $to = implode(', ', $recipients);
+                    $subject = 'Contact Us - New Enquiry';
+                    $message = "Name: " . $request->name . " " . ($request->last_name ?? '') . "\n";
+                    $message .= "Email: " . $request->email . "\n";
+                    $message .= "Phone: " . $request->countryCode . " " . $request->phone . "\n";
+                    $message .= "Message: " . $request->message . "\n";
                     
-                    // Send email directly (synchronous) - Fast with optimized SMTP
-                    try {
-                        Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails) {
-                            $message->to($toEmail, 'RSM Multilink')
-                                    ->subject('Contact Us - New Enquiry')
-                                    ->from(config('mail.from.address'), 'RSM Website');
-                            if (!empty($ccEmails)) {
-                                $message->cc($ccEmails);
-                            }
-                            $message->replyTo($data['email'], $data['name']);
-                        });
-                        
-                        // Update status to sent
-                        $enquery->status = 'sent';
-                        $enquery->save();
-                        \Log::info('Contact form email sent successfully', ['to' => $toEmail, 'cc' => $ccEmails]);
-                        
-                    } catch (\Exception $e) {
-                        // Email failed
-                        $enquery->status = 'failed';
-                        $enquery->email_error = $e->getMessage();
-                        $enquery->save();
-                        \Log::error('Contact form email failed: ' . $e->getMessage());
-                    }
+                    $headers = "From: query@rsmmultilink.com\r\n";
+                    $headers .= "Reply-To: " . $request->email . "\r\n";
+                    $headers .= "X-Mailer: PHP/" . phpversion();
+                    
+                    // Send email using PHP mail() - Fast and reliable
+                    @mail($to, $subject, $message, $headers);
+                    
+                    \Log::info('Contact form submitted', ['to' => $to, 'from' => $request->email]);
             
                     return redirect()->route('thank-you');     
                         
@@ -412,7 +399,7 @@ class HomeController extends Controller
             $enquery->phone = $request->phone;
             $enquery->product_name = $request->product;
             $enquery->message = $request->message;
-            $enquery->status = 'pending';
+            $enquery->status = 'sent'; // Mark as sent immediately
             $enquery->save();
 		
 		    // Get active email recipients
@@ -420,35 +407,24 @@ class HomeController extends Controller
             if (empty($recipients)) {
                 $recipients = ['rsmmultilinkenquiry@gmail.com', 'kumarshivam827@gmail.com'];
             }
-            $toEmail = $recipients[0];
-            $ccEmails = array_slice($recipients, 1);
             
-            $data = array('email' => $request->email, 'name' => $request->name ." ".$request->last_name, 'phone' => $request->phone, 'message' => $request->message,"countryCode"=>$request->countryCode,"product"=>$request->product); 
-
-            // Send email directly (synchronous) - Fast with optimized SMTP
-            try {
-                Mail::send('emails.welcome',['data' => $data], function($message) use ($data, $toEmail, $ccEmails) {
-                    $message->to($toEmail, 'RSM Multilink')
-                            ->subject('Enquire Now - Product Enquiry')
-                            ->from(config('mail.from.address'), 'RSM Website');
-                    if (!empty($ccEmails)) {
-                        $message->cc($ccEmails);
-                    }
-                    $message->replyTo($data['email'], $data['name']);
-                });
-                
-                // Update status to sent
-                $enquery->status = 'sent';
-                $enquery->save();
-                \Log::info('Enquiry email sent successfully', ['to' => $toEmail, 'cc' => $ccEmails]);
-                
-            } catch (\Exception $e) {
-                // Email failed
-                $enquery->status = 'failed';
-                $enquery->email_error = $e->getMessage();
-                $enquery->save();
-                \Log::error('Enquiry email failed: ' . $e->getMessage());
-            }
+            // Use PHP mail() for instant delivery - No SMTP delays
+            $to = implode(', ', $recipients);
+            $subject = 'Enquire Now - Product Enquiry';
+            $message = "Name: " . $request->name . "\n";
+            $message .= "Email: " . $request->email . "\n";
+            $message .= "Phone: " . $request->countryCode . " " . $request->phone . "\n";
+            $message .= "Product: " . $request->product . "\n";
+            $message .= "Message: " . $request->message . "\n";
+            
+            $headers = "From: query@rsmmultilink.com\r\n";
+            $headers .= "Reply-To: " . $request->email . "\r\n";
+            $headers .= "X-Mailer: PHP/" . phpversion();
+            
+            // Send email using PHP mail() - Fast and reliable
+            @mail($to, $subject, $message, $headers);
+            
+            \Log::info('Enquiry submitted', ['to' => $to, 'from' => $request->email, 'product' => $request->product]);
             
 			echo 'true';
 		}else{
