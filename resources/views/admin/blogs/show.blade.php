@@ -10,7 +10,7 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-8">
-                <p><b>ID:</b> {{ $blog->id }}, <b>Views:</b> {{ $blog->views }}, <b>Created at</b>: {{ $blog->created_at }}, <b>Updated At</b> {{ $blog->updated_at }}</p>
+                <p><b>ID:</b> {{ $blog->id }}, <b>Created at</b>: {{ $blog->created_at }}, <b>Updated At</b> {{ $blog->updated_at }}</p>
                 <div class="form-group">
                     <label for="title"><b>Title:</b></label>
                     <p>{{ $blog->title }}</p>
