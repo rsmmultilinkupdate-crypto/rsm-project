@@ -28,19 +28,27 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="image"><b>Featured Image:</b></label>
-                    <img class="img-fluid" src="{{ url( Storage::url($blog->image) ) }}" alt="{{ $blog->title }}">
+                    @if($blog->image)
+                        <img class="img-fluid" src="{{ url( Storage::url($blog->image) ) }}" alt="{{ $blog->title }}">
+                    @else
+                        <p class="text-muted">No image available</p>
+                    @endif
                 </div>
                 <div class="form-group">
                     <label for="categories"><b>Categories:</b></label>
-                    <ul>
-                    @foreach($blog->categories as $category)
-                        <li>{{ $category->name }}</li>
-                    @endforeach
-                    </ul>
+                    @if($blog->categories && $blog->categories->count() > 0)
+                        <ul>
+                        @foreach($blog->categories as $category)
+                            <li>{{ $category->name }}</li>
+                        @endforeach
+                        </ul>
+                    @else
+                        <p class="text-muted">No categories</p>
+                    @endif
                 </div>
                 <div class="form-group">
                     <label for="user_id"><b>Author:</b></label>
-                    {{ $blog->user->name }}
+                    {{ $blog->user ? $blog->user->name : 'Unknown' }}
                 </div>
                 <div class="form-group">
                     <label for="is_active"><b>Publish:</b></label>
