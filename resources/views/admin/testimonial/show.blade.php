@@ -28,7 +28,7 @@
             <div class="col-md-4">
                 <div class="form-group">
                     <label for="image"><b>Featured Image:</b></label>
-                    <img class="img-fluid" src="{{ url( Storage::url($blog->image) ) }}" alt="{{ $blog->title }}">
+                    <img class="img-fluid" src="{{ safe_storage_url($blog->image) }}" alt="{{ $blog->title }}">
                 </div>
                 <div class="form-group">
                     <label for="categories"><b>Categories:</b></label>

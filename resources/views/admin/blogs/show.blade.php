@@ -29,7 +29,7 @@
                 <div class="form-group">
                     <label for="image"><b>Featured Image:</b></label>
                     @if($blog->image)
-                        <img class="img-fluid" src="{{ url( Storage::url($blog->image) ) }}" alt="{{ $blog->title }}">
+                        <img class="img-fluid" src="{{ safe_storage_url($blog->image) }}" alt="{{ $blog->title }}">
                     @else
                         <p class="text-muted">No image available</p>
                     @endif

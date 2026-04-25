@@ -163,8 +163,12 @@ class BlogsController extends Controller
         // Pre Validations are done in StoreBlogPost Request
         // Store the item
 
-        // Store File & Get Path
-        $imagePath = Storage::putFile('images', $request->file('image'));
+        // Store File & Get Path - Use safe method without fileinfo
+        $imagePath = safe_storage_put_file('images', $request->file('image'));
+        
+        if (!$imagePath) {
+            return back()->withErrors(['image' => 'Failed to upload image'])->withInput();
+        }
 
         // Store & Get Categories
         $categoryArr = array();
@@ -248,11 +252,19 @@ class BlogsController extends Controller
         // Get the item to update
         $blog = Blog::findOrFail($id);
 
-        // Store File & Get Path
+        // Store File & Get Path - Use safe method without fileinfo
         if ($request->hasFile('image')) {
-            $imagePath = Storage::putFile('images', $request->file('image'));
-            // Delet Old Image
-            Storage::delete($blog->image);
+            $imagePath = safe_storage_put_file('images', $request->file('image'));
+            
+            if ($imagePath) {
+                // Delete Old Image
+                $oldImagePath = storage_path('app/public/' . $blog->image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            } else {
+                $imagePath = $blog->image;
+            }
         } else {
             $imagePath = $blog->image;
         }
@@ -416,8 +428,12 @@ class BlogsController extends Controller
         // Delete Related Items First
         $blog->categories()->detach();
         $blog->comments()->delete();
-        // Delete Image
-        Storage::delete($blog->image);
+        
+        // Delete Image - Direct file deletion without Storage facade
+        $imagePath = storage_path('app/public/' . $blog->image);
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
+        }
 
         // Permanent Delet the blog
         $status = $blog->forceDelete();
@@ -446,8 +462,13 @@ class BlogsController extends Controller
             // Delete Related Items First
             $blog->categories()->detach();
             $blog->comments()->delete();
-            // Delete Image
-            Storage::delete($blog->image);
+            
+            // Delete Image - Direct file deletion without Storage facade
+            $imagePath = storage_path('app/public/' . $blog->image);
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+            
             // Delete Blog
             $blog->forceDelete();
         }

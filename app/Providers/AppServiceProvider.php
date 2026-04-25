@@ -72,13 +72,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Workaround for missing fileinfo extension
-        // Use ExtensionMimeTypeDetector instead of FinfoMimeTypeDetector
-        if (!class_exists('finfo')) {
-            $this->app->bind(
-                \League\MimeTypeDetection\MimeTypeDetector::class,
-                \League\MimeTypeDetection\ExtensionMimeTypeDetector::class
-            );
+        // Comprehensive workaround for missing fileinfo extension
+        // This ensures the application works without fileinfo PHP extension
+        
+        // 1. Bind MimeTypeDetector to use ExtensionMimeTypeDetector
+        $this->app->bind(
+            \League\MimeTypeDetection\MimeTypeDetector::class,
+            \League\MimeTypeDetection\ExtensionMimeTypeDetector::class
+        );
+        
+        // 2. Override Flysystem's MimeTypeDetector
+        $this->app->singleton('League\Flysystem\MimeTypeDetector', function () {
+            return new \League\MimeTypeDetection\ExtensionMimeTypeDetector();
+        });
+        
+        // 3. Disable assertions in Flysystem to prevent fileinfo checks
+        if (!defined('FLYSYSTEM_DISABLE_ASSERTS')) {
+            define('FLYSYSTEM_DISABLE_ASSERTS', true);
         }
     }
 }
