@@ -27,9 +27,9 @@
 @foreach($blogs as $blog)
 	<div class="col-lg-4"> 
 		<div class="blog-box">
-			<div class="product-image"><img class="w-100" src="{{ asset('/storage/'.$blog->image) }}" loading="lazy" ></div>
+			<div class="product-image"><a href="{{ url('blog/'.$blog->slug) }}"><img class="w-100" src="{{ safe_storage_url($blog->image) }}" loading="lazy" alt="{{ $blog->title }}"></a></div>
 			<p class="date">{{ date('F d, Y h:i A', strtotime($blog->created_at)) }}</p>
-			<div class="product-tittle"><a href="#">{{ $blog->title}}</a></div>
+			<div class="product-tittle"><a href="{{ url('blog/'.$blog->slug) }}">{{ $blog->title}}</a></div>
 			
 			<a class="post-classic-media" href="{{ url('blog/'.$blog->slug) }}"><button class="blog-btn">Read More</button></a>
 		</div>

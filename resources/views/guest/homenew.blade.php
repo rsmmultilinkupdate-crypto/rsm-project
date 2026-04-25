@@ -352,7 +352,7 @@
             <div class="row">
 			@foreach ($blogs as $blog) 
                 <div class="col-lg-4">  <div class="blog-box">
-                    <div class="product-image"><a href="{{url('blog/'.$blog->slug) }}"><img class="w-100" src="{{ asset('/storage/'.$blog->image) }}" alt="blog image" width="376" height="145" loading="lazy" ></a></div>
+                    <div class="product-image"><a href="{{url('blog/'.$blog->slug) }}"><img class="w-100" src="{{ safe_storage_url($blog->image) }}" alt="{{ $blog->title }}" width="376" height="145" loading="lazy" ></a></div>
                     <p class="date">{{ date('F d, Y h:i A', strtotime($blog->created_at)) }}</p>
                     <div class="product-tittle"><a href="{{ url('blog/'.$blog->slug) }}">{{ $blog->title}}</a></div>
                         <a href="{{ url('blog/'.$blog->slug) }}"><button class="blog-btn">Read More</button></a>
