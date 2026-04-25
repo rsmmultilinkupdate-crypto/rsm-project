@@ -72,6 +72,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // Workaround for missing fileinfo extension
+        // Use ExtensionMimeTypeDetector instead of FinfoMimeTypeDetector
+        if (!class_exists('finfo')) {
+            $this->app->bind(
+                \League\MimeTypeDetection\MimeTypeDetector::class,
+                \League\MimeTypeDetection\ExtensionMimeTypeDetector::class
+            );
+        }
     }
 }
