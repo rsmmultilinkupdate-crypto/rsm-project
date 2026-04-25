@@ -18,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Load helpers file manually (in case composer dump-autoload wasn't run)
+        if (file_exists(app_path('helpers.php'))) {
+            require_once app_path('helpers.php');
+        }
         // Wrap database operations in try-catch to prevent boot errors
         try {
             // Share sidebar Categories with all views
